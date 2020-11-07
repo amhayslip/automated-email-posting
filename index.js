@@ -52,8 +52,6 @@ const postToGithub = async (markdown, title) => {
   }
 };
 
-postToGithub();
-
 app.get('/', function(req, res) {
   res.send('hello world');
 });
