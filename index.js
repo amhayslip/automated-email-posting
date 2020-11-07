@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 const saveFile = (md, title, res) => {
-  fs.writeFile(`files/${title}.md`, md, err => {
+  fs.writeFile(`${__dirname}/files/${title}.md`, md, err => {
     if (err) throw err;
     console.log('The file has been saved!');
 
