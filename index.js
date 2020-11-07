@@ -1,5 +1,3 @@
-const { Octokit } = require('@octokit/rest');
-const { Base64 } = require('js-base64');
 const fs = require('fs');
 const TurndownService = require('turndown');
 
@@ -8,64 +6,37 @@ const bodyParser = require('body-parser');
 
 const app = express();
 const cors = require('cors');
-const fetch = require('node-fetch');
-
-require('dotenv').config();
-
-const octokit = new Octokit({
-  auth: process.env.GITHUB_ACCESS_TOKEN,
-});
 
 app.use(cors());
-
-// parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
-
-// parse application/json
 app.use(bodyParser.json());
 
-const postToGithub = async (markdown, title) => {
-  try {
-    const content = markdown;
-    const contentEncoded = Base64.encode(content);
+const saveFile = (md, title, res) => {
+  fs.writeFile(`files/${title}.md`, md, err => {
+    if (err) throw err;
+    console.log('The file has been saved!');
 
-    const { data } = await octokit.repos.createOrUpdateFileContents({
-      // replace the owner and email with your own details
-      owner: 'amhayslip',
-      repo: 'weekly',
-      path: `${title}.md`,
-      message: 'Add new file',
-      content: contentEncoded,
-      committer: {
-        name: `Octokit Bot`,
-        email: 'your-email',
-      },
-      author: {
-        name: 'Octokit Bot',
-        email: 'your-email',
-      },
-    });
-
-    console.log(data);
-  } catch (err) {
-    console.error(err);
-  }
+    res.send('done!');
+  });
 };
 
 app.get('/', function(req, res) {
   res.send('hello world');
 });
 
-app.post('/addtogithub', function(req, res) {
+app.post('/addfile', function(req, res) {
   const { content } = req.body;
   const { title } = req.body;
+
+  const fileSafeTitle = title
+    .split(' ')
+    .join('-')
+    .toLowerCase();
 
   const turndownService = new TurndownService();
   const markdown = turndownService.turndown(content);
 
-  postToGithub(markdown, title);
-
-  res.send('done!');
+  saveFile(markdown, fileSafeTitle, res);
 });
 
 const port = process.env.PORT || 5000;
