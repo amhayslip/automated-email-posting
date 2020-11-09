@@ -56,7 +56,7 @@ app.get('/getFiles', function(req, res) {
     s3.getObject({ Bucket: 'weekly-project-shift-emails', Key: key }, function(error, data) {
       callback({
         content: data.Body.toString('utf8'),
-        title: key,
+        title: key.split('.')[0],
       });
 
       if (error != null) {
